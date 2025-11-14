@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💰 智能记账系统</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- 登录/注册页面 -->
+    <div id="authPage" class="auth-page">
+        <div class="auth-container">
+            <h1>💰 智能记账系统</h1>
+            <div class="auth-tabs">
+                <button class="auth-tab-btn active" onclick="showAuthTab('login')">登录</button>
+                <button class="auth-tab-btn" onclick="showAuthTab('register')">注册</button>
+            </div>
+
+            <!-- 登录表单 -->
+            <div id="loginForm" class="auth-form">
+                <form id="loginFormElement">
+                    <div class="form-group">
+                        <label>用户名</label>
+                        <input type="text" id="loginUsername" required>
+                    </div>
+                    <div class="form-group">
+                        <label>密码</label>
+                        <input type="password" id="loginPassword" required>
+                    </div>
+                    <button type="submit" class="btn-primary">登录</button>
+                </form>
+            </div>
+
+            <!-- 注册表单 -->
+            <div id="registerForm" class="auth-form" style="display:none;">
+                <form id="registerFormElement">
+                    <div class="form-group">
+                        <label>用户名</label>
+                        <input type="text" id="registerUsername" required>
+                    </div>
+                    <div class="form-group">
+                        <label>密码</label>
+                        <input type="password" id="registerPassword" required>
+                    </div>
+                    <div class="form-group">
+                        <label>确认密码</label>
+                        <input type="password" id="confirmPassword" required>
+                    </div>
+                    <button type="submit" class="btn-primary">注册</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主应用页面 -->
+    <div id="appPage" class="app-page" style="display:none;">
+        <nav class="navbar">
+            <h2>💰 智能记账系统</h2>
+            <div class="nav-right">
+                <span id="currentUsername"></span>
+                <button onclick="logout()" class="btn-logout">退出登录</button>
+            </div>
+        </nav>
+
+        <div class="container">
+            <!-- 标签页导航 -->
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="overview">概览</button>
+                <button class="tab-btn" data-tab="transactions">记账</button>
+                <button class="tab-btn" data-tab="budget">预算</button>
+                <button class="tab-btn" data-tab="loan">贷款</button>
+                <button class="tab-btn" data-tab="recurring">定期账单</button>
+                <button class="tab-btn" data-tab="savings">储蓄目标</button>
+                <button class="tab-btn" data-tab="accounts">账户管理</button>
+                <button class="tab-btn" data-tab="ai">🤖 AI分析</button>
+            </div>
+
+            <!-- 概览页面 -->
+            <div id="overview" class="tab-content active">
+                <div class="stats-grid">
+                    <div class="stat-card income">
+                        <h3>本月收入</h3>
+                        <p class="amount" id="totalIncome">¥0</p>
+                    </div>
+                    <div class="stat-card expense">
+                        <h3>本月支出</h3>
+                        <p class="amount" id="totalExpense">¥0</p>
+                    </div>
+                    <div class="stat-card balance">
+                        <h3>本月结余</h3>
+                        <p class="amount" id="balance">¥0</p>
+                    </div>
+                    <div class="stat-card total">
+                        <h3>总资产</h3>
+                        <p class="amount" id="totalAssets">¥0</p>
+                    </div>
+                </div>
+
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <h3>收支趋势（最近6个月）</h3>
+                        <canvas id="trendChart"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h3>支出分类</h3>
+                        <canvas id="categoryChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="recent-transactions">
+                    <h3>最近交易</h3>
+                    <div id="recentList"></div>
+                </div>
+            </div>
+
+            <!-- 记账页面 -->
+            <div id="transactions" class="tab-content">
+                <div class="card">
+                    <h3>添加交易</h3>
+                    <form id="transactionForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>类型</label>
+                                <select id="type" required>
+                                    <option value="expense">支出</option>
+                                    <option value="income">收入</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>分类</label>
+                                <select id="category" required></select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>金额</label>
+                                <input type="number" id="amount" step="0.01" required>
+                            </div>
+                            <div class="form-group">
+                                <label>日期</label>
+                                <input type="date" id="date" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>备注</label>
+                            <input type="text" id="note" placeholder="可选">
+                        </div>
+                        <button type="submit" class="btn-primary">添加交易</button>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3>交易记录</h3>
+                        <button onclick="exportData()" class="btn-secondary">📥 导出数据</button>
+                    </div>
+                    <div id="transactionsList"></div>
+                </div>
+            </div>
+
+            <!-- 预算页面 -->
+            <div id="budget" class="tab-content">
+                <div class="card">
+                    <h3>设置预算</h3>
+                    <form id="budgetForm">
+                        <div class="form-group">
+                            <label>分类</label>
+                            <select id="budgetCategory" required></select>
+                        </div>
+                        <div class="form-group">
+                            <label>月度预算</label>
+                            <input type="number" id="budgetAmount" step="0.01" required>
+                        </div>
+                        <button type="submit" class="btn-primary">设置预算</button>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <h3>预算执行情况</h3>
+                    <div id="budgetList"></div>
+                </div>
+            </div>
+
+            <!-- 贷款页面 -->
+            <div id="loan" class="tab-content">
+                <div class="card">
+                    <h3>添加贷款</h3>
+                    <form id="loanForm">
+                        <div class="form-group">
+                            <label>贷款名称</label>
+                            <input type="text" id="loanName" required>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>贷款金额</label>
+                                <input type="number" id="loanAmount" step="0.01" required>
+                            </div>
+                            <div class="form-group">
+                                <label>年利率 (%)</label>
+                                <input type="number" id="loanRate" step="0.01" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>期数（月）</label>
+                                <input type="number" id="loanMonths" required>
+                            </div>
+                            <div class="form-group">
+                                <label>开始日期</label>
+                                <input type="date" id="loanStartDate" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-primary">添加贷款</button>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <h3>贷款列表</h3>
+                    <div id="loanList"></div>
+                </div>
+            </div>
+
+            <!-- 定期账单页面 -->
+            <div id="recurring" class="tab-content">
+                <div class="card">
+                    <h3>添加定期账单</h3>
+                    <form id="recurringForm">
+                        <div class="form-group">
+                            <label>账单名称</label>
+                            <input type="text" id="recurringName" required>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>金额</label>
+                                <input type="number" id="recurringAmount" step="0.01" required>
+                            </div>
+                            <div class="form-group">
+                                <label>频率</label>
+                                <select id="recurringFrequency" required>
+                                    <option value="monthly">每月</option>
+                                    <option value="quarterly">每季度</option>
+                                    <option value="yearly">每年</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>下次扣款日期</label>
+                            <input type="date" id="recurringNextDate" required>
+                        </div>
+                        <button type="submit" class="btn-primary">添加账单</button>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <h3>定期账单列表</h3>
+                    <div id="recurringList"></div>
+                </div>
+            </div>
+
+            <!-- 储蓄目标页面 -->
+            <div id="savings" class="tab-content">
+                <div class="card">
+                    <h3>添加储蓄目标</h3>
+                    <form id="savingsForm">
+                        <div class="form-group">
+                            <label>目标名称</label>
+                            <input type="text" id="savingsName" required>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>目标金额</label>
+                                <input type="number" id="savingsTarget" step="0.01" required>
+                            </div>
+                            <div class="form-group">
+                                <label>当前金额</label>
+                                <input type="number" id="savingsCurrent" step="0.01" value="0" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>目标日期</label>
+                            <input type="date" id="savingsDeadline" required>
+                        </div>
+                        <button type="submit" class="btn-primary">添加目标</button>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <h3>储蓄目标列表</h3>
+                    <div id="savingsList"></div>
+                </div>
+            </div>
+
+            <!-- 账户管理页面 -->
+            <div id="accounts" class="tab-content">
+                <div class="card">
+                    <h3>添加账户</h3>
+                    <form id="accountForm">
+                        <div class="form-group">
+                            <label>账户名称</label>
+                            <input type="text" id="accountName" required>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>账户类型</label>
+                                <select id="accountType" required>
+                                    <option value="现金">现金</option>
+                                    <option value="银行卡">银行卡</option>
+                                    <option value="信用卡">信用卡</option>
+                                    <option value="支付宝">支付宝</option>
+                                    <option value="微信">微信</option>
+                                    <option value="其他">其他</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>初始余额</label>
+                                <input type="number" id="accountBalance" step="0.01" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-primary">添加账户</button>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <h3>账户列表</h3>
+                    <div id="accountsList"></div>
+                </div>
+            </div>
+
+            <!-- AI分析页面 -->
+            <div id="ai" class="tab-content">
+                <div class="card">
+                    <h3>🔑 API设置</h3>
+                    <div class="form-group">
+                        <label>DeepSeek API Key</label>
+                        <input type="password" id="apiKeyInput" placeholder="输入您的API密钥">
+                        <button onclick="saveApiKey()" class="btn-secondary" style="margin-top: 10px;">保存密钥</button>
+                        <p style="font-size: 12px; color: #666; margin-top: 5px;">💡 提示：访问 <a href="https://platform.deepseek.com" target="_blank">DeepSeek平台</a> 获取API密钥</p>
+                    </div>
+                </div>
+
+                <div class="ai-features">
+                    <div class="ai-card" onclick="analyzeFinance()">
+                        <h3>📊 财务分析</h3>
+                        <p>AI分析您的收支状况，提供专业建议</p>
+                    </div>
+                    <div class="ai-card" onclick="getSpendingHabits()">
+                        <h3>💡 消费习惯</h3>
+                        <p>深度分析您的消费模式和习惯</p>
+                    </div>
+                    <div class="ai-card" onclick="getSavingTips()">
+                        <h3>💰 节省建议</h3>
+                        <p>获取个性化的省钱技巧</p>
+                    </div>
+                    <div class="ai-card" onclick="getForecast()">
+                        <h3>🔮 财务预测</h3>
+                        <p>预测未来财务趋势</p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>💬 AI对话助手</h3>
+                    <div id="chatMessages" class="chat-messages"></div>
+                    <div class="chat-input-container">
+                        <input type="text" id="chatInput" placeholder="输入您的问题..." onkeypress="if(event.key==='Enter') sendChat()">
+                        <button onclick="sendChat()" class="btn-primary">发送</button>
+                    </div>
+                </div>
+
+                <div id="aiResult" class="card" style="display:none;">
+                    <h3>分析结果</h3>
+                    <div id="aiResultContent" class="result-content"></div>
+                </div>
+
+                <div id="loadingOverlay" class="loading-overlay" style="display:none;">
+                    <div class="loading-spinner"></div>
+                    <p id="loadingText">AI分析中...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
