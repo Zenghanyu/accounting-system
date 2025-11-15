@@ -4,6 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>💰 哈记米 - AI智能记账助手</title>
+
+    <!-- PWA Meta Tags -->
+    <meta name="description" content="小记AI助手，让记账更简单。支持语音记账、智能分析、财务管理等功能">
+    <meta name="theme-color" content="#667eea">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="哈记米">
+    <link rel="manifest" href="manifest.json">
+
+    <!-- App Icons -->
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -1101,5 +1115,59 @@
     <!-- SheetJS库 - 用于解析Excel文件 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="app.js"></script>
+
+    <!-- PWA Service Worker 注册 -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('service-worker.js')
+                    .then(registration => {
+                        console.log('✅ Service Worker 注册成功:', registration.scope);
+
+                        // 检查更新
+                        registration.addEventListener('updatefound', () => {
+                            const newWorker = registration.installing;
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    // 有新版本可用
+                                    if (confirm('有新版本可用，是否立即更新？')) {
+                                        newWorker.postMessage({ action: 'skipWaiting' });
+                                        window.location.reload();
+                                    }
+                                }
+                            });
+                        });
+                    })
+                    .catch(error => {
+                        console.log('❌ Service Worker 注册失败:', error);
+                    });
+            });
+
+            // 监听 Service Worker 控制器变化
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                console.log('🔄 Service Worker 已更新');
+            });
+        }
+
+        // PWA 安装提示
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // 阻止默认的安装提示
+            e.preventDefault();
+            deferredPrompt = e;
+
+            // 显示自定义安装按钮（可选）
+            console.log('💡 可以安装为应用');
+
+            // 可以在这里显示自定义的安装提示
+            // 例如：showInstallPromotion();
+        });
+
+        // 监听应用安装
+        window.addEventListener('appinstalled', () => {
+            console.log('🎉 应用已安装');
+            deferredPrompt = null;
+        });
+    </script>
 </body>
 </html>
