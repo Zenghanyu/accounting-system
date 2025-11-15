@@ -11,29 +11,262 @@ body {
     min-height: 100vh;
 }
 
+/* ==================== 启动欢迎页面 ==================== */
+.splash-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    animation: fadeOut 0.5s ease-out 2.5s forwards;
+}
+
+@keyframes fadeOut {
+    to {
+        opacity: 0;
+        visibility: hidden;
+    }
+}
+
+.splash-content {
+    text-align: center;
+    animation: slideUp 0.8s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.splash-image {
+    max-width: 90%;
+    width: 600px;
+    height: auto;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    margin-bottom: 30px;
+    animation: zoomIn 0.6s ease-out;
+}
+
+@keyframes zoomIn {
+    from {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.splash-loader {
+    width: 300px;
+    height: 6px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 3px;
+    margin: 0 auto 15px;
+    overflow: hidden;
+}
+
+.loader-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #fff, rgba(255,255,255,0.8));
+    border-radius: 3px;
+    animation: loading 2s ease-in-out;
+}
+
+@keyframes loading {
+    0% {
+        width: 0%;
+    }
+    100% {
+        width: 100%;
+    }
+}
+
+.splash-text {
+    color: white;
+    font-size: 16px;
+    font-weight: 500;
+    opacity: 0.9;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 0.6;
+    }
+    50% {
+        opacity: 1;
+    }
+}
+
 /* 登录/注册页面 */
 .auth-page {
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     min-height: 100vh;
-    padding: 20px;
+    gap: 0;
 }
 
+@media (max-width: 968px) {
+    .auth-page {
+        grid-template-columns: 1fr;
+    }
+    .auth-hero {
+        display: none;
+    }
+}
+
+/* 封面区域 */
+.auth-hero {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 40px;
+    position: relative;
+    overflow: hidden;
+}
+
+.auth-hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    animation: float 20s infinite ease-in-out;
+}
+
+@keyframes float {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    50% { transform: translate(-20px, 20px) rotate(180deg); }
+}
+
+.hero-content {
+    position: relative;
+    z-index: 1;
+    color: white;
+    text-align: center;
+    max-width: 500px;
+}
+
+.hero-icon {
+    font-size: 80px;
+    margin-bottom: 20px;
+    animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+.hero-title {
+    font-size: 48px;
+    font-weight: bold;
+    margin-bottom: 15px;
+    text-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+.hero-subtitle {
+    font-size: 18px;
+    margin-bottom: 40px;
+    opacity: 0.95;
+}
+
+.hero-quote {
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 30px;
+    margin-bottom: 40px;
+    border: 1px solid rgba(255,255,255,0.2);
+    position: relative;
+}
+
+.quote-mark {
+    position: absolute;
+    top: -10px;
+    left: 20px;
+    font-size: 80px;
+    opacity: 0.3;
+    font-family: Georgia, serif;
+}
+
+.quote-text {
+    font-size: 20px;
+    font-style: italic;
+    margin-bottom: 10px;
+    line-height: 1.6;
+    position: relative;
+    z-index: 1;
+}
+
+.quote-author {
+    font-size: 14px;
+    opacity: 0.9;
+    text-align: right;
+}
+
+.hero-features {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+}
+
+.hero-feature {
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(10px);
+    padding: 15px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid rgba(255,255,255,0.2);
+    transition: all 0.3s;
+}
+
+.hero-feature:hover {
+    background: rgba(255,255,255,0.25);
+    transform: translateY(-2px);
+}
+
+.feature-icon {
+    font-size: 24px;
+}
+
+.hero-feature span:last-child {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* 登录表单容器 */
 .auth-container {
     background: white;
-    border-radius: 20px;
-    padding: 40px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-    width: 100%;
-    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 60px;
 }
 
-.auth-container h1 {
-    text-align: center;
-    color: #667eea;
-    margin-bottom: 30px;
-    font-size: 28px;
+@media (max-width: 968px) {
+    .auth-container {
+        padding: 40px 20px;
+    }
 }
 
 .auth-tabs {
@@ -939,3 +1172,2242 @@ body {
         max-height: 150px;
     }
 }
+
+/* ==================== AI智能助手面板 ==================== */
+
+.ai-assistant-panel {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 20px;
+    padding: 25px;
+    margin-bottom: 30px;
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+}
+
+.ai-assistant-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.ai-assistant-header h3 {
+    color: white;
+    font-size: 22px;
+    margin: 0;
+}
+
+.btn-refresh {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    border-radius: 10px;
+    padding: 8px 15px;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-refresh:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: rotate(180deg);
+}
+
+.ai-insights-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.ai-insight-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    background: white;
+    padding: 15px;
+    border-radius: 12px;
+    transition: all 0.3s;
+    border-left: 4px solid transparent;
+}
+
+.ai-insight-item.warning {
+    border-left-color: #f59e0b;
+    background: #fffbeb;
+}
+
+.ai-insight-item.suggestion {
+    border-left-color: #3b82f6;
+    background: #eff6ff;
+}
+
+.ai-insight-item.success {
+    border-left-color: #10b981;
+    background: #f0fdf4;
+}
+
+.ai-insight-item.info {
+    border-left-color: #8b5cf6;
+    background: #faf5ff;
+}
+
+.ai-insight-item.error {
+    border-left-color: #ef4444;
+    background: #fef2f2;
+}
+
+.ai-insight-item:hover {
+    transform: translateX(5px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.ai-insight-icon {
+    font-size: 24px;
+    flex-shrink: 0;
+}
+
+.ai-insight-content {
+    flex: 1;
+}
+
+.ai-insight-title {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.ai-insight-text {
+    color: #666;
+    line-height: 1.5;
+    font-size: 14px;
+}
+
+.ai-insight-loading {
+    background: rgba(255, 255, 255, 0.9);
+    padding: 20px;
+    border-radius: 12px;
+    text-align: center;
+}
+
+.loading-dots {
+    color: #667eea;
+    font-weight: 600;
+}
+
+.loading-dots span {
+    animation: blink 1.4s infinite;
+}
+
+.loading-dots span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.loading-dots span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes blink {
+    0%, 60%, 100% {
+        opacity: 1;
+    }
+    30% {
+        opacity: 0.3;
+    }
+}
+
+/* ==================== AI智能分类推荐 ==================== */
+
+.ai-suggestion {
+    margin: 15px 0;
+    padding: 15px;
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border-radius: 12px;
+    border: 2px solid #fbbf24;
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.ai-suggestion-header {
+    font-weight: 600;
+    color: #92400e;
+    margin-bottom: 10px;
+    font-size: 14px;
+}
+
+.ai-thinking {
+    color: #92400e;
+    font-style: italic;
+    animation: pulse 1.5s infinite;
+}
+
+.ai-suggestion-result {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.suggestion-badge {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.suggestion-reason {
+    color: #92400e;
+    font-size: 13px;
+    flex: 1;
+}
+
+.btn-apply-suggestion {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    border: none;
+    padding: 6px 15px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-apply-suggestion:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+/* ==================== 异常交易标记 ==================== */
+
+.transaction-item.anomalous {
+    border-left: 4px solid #f59e0b;
+    background: #fffbeb;
+}
+
+.badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-left: 8px;
+}
+
+.badge-warning {
+    background: #fef3c7;
+    color: #92400e;
+    border: 1px solid #fbbf24;
+}
+
+.badge-large {
+    background: #dbeafe;
+    color: #1e40af;
+    border: 1px solid #3b82f6;
+}
+
+/* ==================== Toast消息提示 ==================== */
+
+.toast-message {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    padding: 15px 25px;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
+    font-weight: 600;
+    z-index: 10000;
+    opacity: 0;
+    transform: translateX(400px);
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.toast-message.show {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* ==================== AI Key Notice ==================== */
+
+.ai-key-notice {
+    display: flex;
+    gap: 15px;
+    padding: 20px;
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    border-radius: 15px;
+    border: 2px solid #10b981;
+    margin-bottom: 20px;
+}
+
+.notice-icon {
+    font-size: 32px;
+    flex-shrink: 0;
+}
+
+.notice-content h4 {
+    color: #065f46;
+    margin-bottom: 8px;
+    font-size: 16px;
+}
+
+.notice-content p {
+    color: #047857;
+    line-height: 1.6;
+    font-size: 14px;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .ai-assistant-panel {
+        padding: 20px 15px;
+    }
+
+    .ai-assistant-header h3 {
+        font-size: 18px;
+    }
+
+    .ai-insight-item {
+        padding: 12px;
+    }
+
+    .ai-suggestion-result {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .btn-apply-suggestion {
+        width: 100%;
+    }
+
+    .toast-message {
+        right: 10px;
+        left: 10px;
+        top: 70px;
+    }
+
+    .ai-key-notice {
+        flex-direction: column;
+        gap: 10px;
+    }
+}
+
+/* ==================== 顶部功能区域 ==================== */
+
+.top-features-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.header-actions {
+    display: flex;
+    gap: 10px;
+}
+
+/* ==================== 财务健康评分卡片 ==================== */
+
+.health-score-card {
+    background: white;
+    border-radius: 20px;
+    padding: 25px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.health-score-card h3 {
+    color: #333;
+    margin-bottom: 20px;
+    font-size: 20px;
+}
+
+.score-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.score-circle {
+    position: relative;
+    margin-bottom: 25px;
+}
+
+.score-value {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+
+.score-number {
+    font-size: 48px;
+    font-weight: 700;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.score-label {
+    font-size: 14px;
+    color: #666;
+    margin-top: 5px;
+    font-weight: 600;
+}
+
+.score-factors {
+    width: 100%;
+}
+
+.factor-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.factor-label {
+    width: 100px;
+    font-size: 13px;
+    color: #666;
+    flex-shrink: 0;
+}
+
+.factor-bar {
+    flex: 1;
+    height: 8px;
+    background: #e5e7eb;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.factor-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    transition: width 0.5s ease;
+}
+
+.factor-score {
+    width: 50px;
+    text-align: right;
+    font-size: 12px;
+    font-weight: 600;
+    color: #667eea;
+}
+
+/* ==================== 挑战任务卡片 ==================== */
+
+.challenge-card {
+    background: white;
+    border-radius: 20px;
+    padding: 25px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.challenge-card h3 {
+    color: #333;
+    margin-bottom: 20px;
+    font-size: 20px;
+}
+
+.challenge-loading,
+.no-challenge {
+    text-align: center;
+    padding: 40px 20px;
+    color: #999;
+}
+
+.challenge-item {
+    display: flex;
+    gap: 15px;
+    padding: 15px;
+    background: #f9fafb;
+    border-radius: 15px;
+    margin-bottom: 15px;
+    transition: all 0.3s;
+}
+
+.challenge-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.challenge-item.completed {
+    background: #f0fdf4;
+    border-left: 4px solid #10b981;
+}
+
+.challenge-icon {
+    font-size: 32px;
+    flex-shrink: 0;
+}
+
+.challenge-content {
+    flex: 1;
+}
+
+.challenge-title {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 5px;
+    font-size: 15px;
+}
+
+.challenge-desc {
+    color: #666;
+    font-size: 13px;
+    margin-bottom: 10px;
+}
+
+.challenge-progress-bar {
+    height: 8px;
+    background: #e5e7eb;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.challenge-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+    transition: width 0.3s ease;
+}
+
+.challenge-stats {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+}
+
+.challenge-stats span:first-child {
+    color: #666;
+    font-weight: 600;
+}
+
+.challenge-reward {
+    color: #10b981;
+    font-weight: 600;
+}
+
+/* ==================== 智能标签 ==================== */
+
+.smart-tag {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-left: 5px;
+    margin-bottom: 3px;
+}
+
+/* ==================== 响应式设计 ==================== */
+
+@media (max-width: 968px) {
+    .top-features-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .header-actions {
+        flex-direction: column;
+    }
+
+    .header-actions button {
+        width: 100%;
+    }
+
+    .challenge-item {
+        flex-direction: column;
+    }
+
+    .challenge-icon {
+        font-size: 24px;
+    }
+}
+
+@media (max-width: 768px) {
+    .health-score-card,
+    .challenge-card {
+        padding: 20px 15px;
+    }
+
+    .score-number {
+        font-size: 36px;
+    }
+
+    .factor-label {
+        width: 80px;
+        font-size: 12px;
+    }
+}
+
+/* ==================== 日历视图样式 ==================== */
+.calendar-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 20px;
+    padding: 20px;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.calendar-header h2 {
+    margin: 0;
+    font-size: 24px;
+    color: #333;
+}
+
+.btn-calendar-nav {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 20px;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-calendar-nav:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.calendar-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.calendar-stat-item {
+    background: white;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.calendar-stat-item.income {
+    border-left: 4px solid #10b981;
+}
+
+.calendar-stat-item.expense {
+    border-left: 4px solid #ef4444;
+}
+
+.calendar-stat-item.balance {
+    border-left: 4px solid #667eea;
+}
+
+.stat-label {
+    font-size: 14px;
+    color: #666;
+}
+
+.stat-value {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+}
+
+.calendar-grid {
+    background: white;
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+}
+
+.calendar-weekday {
+    text-align: center;
+    font-weight: bold;
+    color: #667eea;
+    padding: 10px;
+    font-size: 14px;
+}
+
+.calendar-day {
+    aspect-ratio: 1;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid #e5e7eb;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    background: white;
+}
+
+.calendar-day:hover {
+    border-color: #667eea;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+}
+
+.calendar-day.other-month {
+    opacity: 0.3;
+    background: #f9fafb;
+}
+
+.calendar-day.today {
+    border: 2px solid #667eea;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+}
+
+.calendar-day.selected {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-color: #667eea;
+}
+
+.calendar-day.selected .day-number {
+    color: white;
+}
+
+.calendar-day.selected .day-amount {
+    color: rgba(255,255,255,0.9);
+}
+
+.day-number {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.day-amount {
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.day-amount.income {
+    color: #10b981;
+}
+
+.day-amount.expense {
+    color: #ef4444;
+}
+
+.day-amount.both {
+    color: #667eea;
+}
+
+.day-indicator {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    position: absolute;
+    bottom: 5px;
+}
+
+.day-indicator.income-dot {
+    background: #10b981;
+}
+
+.day-indicator.expense-dot {
+    background: #ef4444;
+}
+
+/* 日期详情弹窗 */
+.day-details {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    width: 90%;
+    max-width: 600px;
+    max-height: 80vh;
+    overflow: hidden;
+    z-index: 1000;
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -40%);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%);
+    }
+}
+
+.day-details-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid #e5e7eb;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.day-details-header h3 {
+    margin: 0;
+    font-size: 20px;
+}
+
+.btn-close {
+    background: rgba(255,255,255,0.2);
+    border: none;
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    font-size: 20px;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-close:hover {
+    background: rgba(255,255,255,0.3);
+    transform: rotate(90deg);
+}
+
+.day-transactions-list {
+    padding: 20px;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.day-transaction-item {
+    background: #f9fafb;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.day-transaction-item.income {
+    border-left: 4px solid #10b981;
+}
+
+.day-transaction-item.expense {
+    border-left: 4px solid #ef4444;
+}
+
+.day-transaction-info {
+    flex: 1;
+}
+
+.day-transaction-category {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 4px;
+}
+
+.day-transaction-note {
+    font-size: 13px;
+    color: #666;
+}
+
+.day-transaction-amount {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.day-transaction-amount.income {
+    color: #10b981;
+}
+
+.day-transaction-amount.expense {
+    color: #ef4444;
+}
+
+@media (max-width: 768px) {
+    .calendar-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .calendar-grid {
+        gap: 5px;
+        padding: 10px;
+    }
+
+    .calendar-day {
+        padding: 5px;
+    }
+
+    .day-number {
+        font-size: 14px;
+    }
+
+    .day-amount {
+        font-size: 10px;
+    }
+}
+
+/* ==================== 商家分析样式 ==================== */
+.merchant-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.merchant-stat-card {
+    background: linear-gradient(135deg, #f9fafb 0%, #ffffff 100%);
+    border-radius: 15px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    border: 1px solid #e5e7eb;
+    transition: all 0.3s;
+}
+
+.merchant-stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.stat-icon {
+    font-size: 36px;
+}
+
+.stat-content {
+    flex: 1;
+}
+
+.merchant-ranking {
+    margin-top: 20px;
+}
+
+.merchant-ranking h4 {
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.merchant-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.merchant-item {
+    background: #f9fafb;
+    border-radius: 12px;
+    padding: 15px 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    transition: all 0.3s;
+    border: 1px solid #e5e7eb;
+}
+
+.merchant-item:hover {
+    background: white;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    transform: translateX(5px);
+}
+
+.merchant-rank {
+    font-size: 20px;
+    font-weight: bold;
+    color: #667eea;
+    min-width: 40px;
+    text-align: center;
+}
+
+.merchant-rank.top1 {
+    color: #fbbf24;
+    font-size: 24px;
+}
+
+.merchant-rank.top2 {
+    color: #9ca3af;
+    font-size: 22px;
+}
+
+.merchant-rank.top3 {
+    color: #cd7f32;
+    font-size: 22px;
+}
+
+.merchant-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.merchant-name {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.merchant-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 10px;
+}
+
+.merchant-details {
+    font-size: 13px;
+    color: #666;
+}
+
+.merchant-amount {
+    text-align: right;
+    min-width: 100px;
+}
+
+.merchant-total {
+    font-size: 20px;
+    font-weight: bold;
+    color: #ef4444;
+    margin-bottom: 2px;
+}
+
+.merchant-count {
+    font-size: 12px;
+    color: #999;
+}
+
+@media (max-width: 768px) {
+    .merchant-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .merchant-item {
+        flex-wrap: wrap;
+    }
+
+    .merchant-amount {
+        width: 100%;
+        text-align: left;
+        margin-top: 10px;
+    }
+}
+
+/* ==================== 储蓄计划样式 ==================== */
+.savings-plan-form {
+    background: #f9fafb;
+    padding: 25px;
+    border-radius: 15px;
+    margin-bottom: 25px;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.icon-selector {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.icon-selector input[type="radio"] {
+    display: none;
+}
+
+.icon-selector label {
+    padding: 10px;
+    border: 2px solid #e5e7eb;
+    border-radius: 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 14px;
+}
+
+.icon-selector label:hover {
+    border-color: #667eea;
+    background: rgba(102, 126, 234, 0.05);
+}
+
+.icon-selector input[type="radio"]:checked + label {
+    border-color: #667eea;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+    font-weight: 600;
+}
+
+.savings-plans-list {
+    display: grid;
+    gap: 20px;
+}
+
+.savings-plan-card {
+    background: white;
+    border-radius: 20px;
+    padding: 25px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    transition: all 0.3s;
+    border: 2px solid #e5e7eb;
+}
+
+.savings-plan-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+}
+
+.plan-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.plan-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.plan-icon {
+    font-size: 32px;
+}
+
+.plan-name-group h4 {
+    margin: 0 0 4px 0;
+    font-size: 20px;
+    color: #333;
+}
+
+.plan-deadline {
+    font-size: 13px;
+    color: #999;
+}
+
+.plan-delete-btn {
+    background: #fee2e2;
+    color: #ef4444;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 14px;
+}
+
+.plan-delete-btn:hover {
+    background: #fecaca;
+}
+
+.plan-progress {
+    margin-bottom: 20px;
+}
+
+.progress-bar-container {
+    background: #e5e7eb;
+    height: 30px;
+    border-radius: 15px;
+    overflow: hidden;
+    margin-bottom: 10px;
+    position: relative;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    transition: width 0.5s ease;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 10px;
+    color: white;
+    font-weight: bold;
+    font-size: 13px;
+}
+
+.progress-info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    color: #666;
+}
+
+.plan-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    background: #f9fafb;
+    padding: 15px;
+    border-radius: 12px;
+}
+
+.plan-stat-item {
+    text-align: center;
+}
+
+.plan-stat-label {
+    font-size: 12px;
+    color: #999;
+    margin-bottom: 4px;
+}
+
+.plan-stat-value {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+}
+
+.plan-stat-value.highlight {
+    color: #667eea;
+}
+
+.plan-stat-value.success {
+    color: #10b981;
+}
+
+.plan-stat-value.warning {
+    color: #f59e0b;
+}
+
+.plan-status-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-top: 10px;
+}
+
+.plan-status-badge.on-track {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.plan-status-badge.behind {
+    background: #fed7aa;
+    color: #92400e;
+}
+
+.plan-status-badge.completed {
+    background: #ddd6fe;
+    color: #5b21b6;
+}
+
+@media (max-width: 768px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .icon-selector {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .plan-stats {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ==================== 子标签样式 ==================== */
+.sub-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #f3f4f6;
+}
+
+.sub-tab-btn {
+    padding: 10px 20px;
+    background: transparent;
+    border: none;
+    border-bottom: 3px solid transparent;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    color: #666;
+    transition: all 0.3s;
+    white-space: nowrap;
+}
+
+.sub-tab-btn:hover {
+    color: #667eea;
+    background: #f9fafb;
+    border-radius: 8px 8px 0 0;
+}
+
+.sub-tab-btn.active {
+    color: #667eea;
+    border-bottom-color: #667eea;
+    font-weight: 600;
+}
+
+.sub-tab-content {
+    display: none;
+}
+
+.sub-tab-content.active {
+    display: block;
+    animation: fadeIn 0.3s ease-in;
+}
+
+/* ==================== 借贷管理样式 ==================== */
+.lend-item,
+.borrow-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    background: #f9fafb;
+    border-radius: 10px;
+    margin-bottom: 12px;
+    border-left: 4px solid #667eea;
+    transition: all 0.3s;
+}
+
+.lend-item:hover,
+.borrow-item:hover {
+    background: #f3f4f6;
+    transform: translateX(4px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.lend-item.returned,
+.borrow-item.returned {
+    opacity: 0.6;
+    border-left-color: #10b981;
+}
+
+.lend-info,
+.borrow-info {
+    flex: 1;
+}
+
+.lend-info h4,
+.borrow-info h4 {
+    color: #333;
+    margin-bottom: 6px;
+    font-size: 16px;
+}
+
+.lend-info p,
+.borrow-info p {
+    color: #666;
+    font-size: 14px;
+    margin: 4px 0;
+}
+
+.lend-amount,
+.borrow-amount {
+    font-size: 24px;
+    font-weight: 700;
+    margin-right: 16px;
+}
+
+.lend-amount {
+    color: #10b981; /* 绿色 - 借出 */
+}
+
+.borrow-amount {
+    color: #ef4444; /* 红色 - 借入 */
+}
+
+.lend-actions,
+.borrow-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-return,
+.btn-remind {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.3s;
+}
+
+.btn-return {
+    background: #10b981;
+    color: white;
+}
+
+.btn-return:hover {
+    background: #059669;
+    transform: translateY(-2px);
+}
+
+.btn-remind {
+    background: #f59e0b;
+    color: white;
+}
+
+.btn-remind:hover {
+    background: #d97706;
+    transform: translateY(-2px);
+}
+
+.lend-summary,
+.borrow-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+    padding: 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 12px;
+    color: white;
+}
+
+.summary-item {
+    text-align: center;
+}
+
+.summary-item h4 {
+    font-size: 14px;
+    opacity: 0.9;
+    margin-bottom: 8px;
+}
+
+.summary-item .amount {
+    font-size: 28px;
+    font-weight: 700;
+}
+
+.overdue-tag {
+    display: inline-block;
+    padding: 4px 8px;
+    background: #ef4444;
+    color: white;
+    border-radius: 4px;
+    font-size: 12px;
+    margin-left: 8px;
+}
+
+@media (max-width: 768px) {
+    .sub-tabs {
+        flex-wrap: nowrap;
+    }
+
+    .lend-item,
+    .borrow-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .lend-amount,
+    .borrow-amount {
+        margin: 12px 0;
+    }
+
+    .lend-actions,
+    .borrow-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+}
+
+/* ==================== 多币种功能样式 ==================== */
+
+.currency-converter {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 20px;
+    border-radius: 15px;
+    margin: 15px 0;
+    color: white;
+}
+
+.currency-converter h4 {
+    margin: 0 0 15px 0;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.converter-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.converter-row input,
+.converter-row select {
+    flex: 1;
+    min-width: 100px;
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.converter-row span {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.converter-result {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 15px;
+    border-radius: 10px;
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.result-amount {
+    font-size: 24px;
+    font-weight: bold;
+    display: block;
+}
+
+.currency-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-left: 8px;
+}
+
+.currency-badge.CNY {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.currency-badge.USD {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.currency-badge.EUR {
+    background: #e0e7ff;
+    color: #3730a3;
+}
+
+.currency-badge.GBP {
+    background: #fce7f3;
+    color: #9f1239;
+}
+
+.currency-badge.JPY {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.currency-badge.HKD {
+    background: #f3e8ff;
+    color: #6b21a8;
+}
+
+.currency-badge.KRW {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.currency-badge.SGD {
+    background: #fef9c3;
+    color: #713f12;
+}
+
+.currency-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.currency-stat-card {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    padding: 15px;
+    border-radius: 12px;
+    text-align: center;
+}
+
+.currency-stat-card h4 {
+    margin: 0 0 10px 0;
+    font-size: 14px;
+    color: #64748b;
+}
+
+.currency-stat-card .amount {
+    font-size: 24px;
+    font-weight: bold;
+    color: #1e293b;
+}
+
+.exchange-rate-note {
+    background: #fef3c7;
+    border-left: 4px solid #f59e0b;
+    padding: 12px;
+    margin: 15px 0;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #92400e;
+}
+
+@media (max-width: 768px) {
+    .converter-row {
+        flex-direction: column;
+    }
+
+    .converter-row input,
+    .converter-row select {
+        width: 100%;
+    }
+
+    .currency-stats {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ==================== 智能短信/邮件解析样式 ==================== */
+
+.smart-parse-card {
+    margin: 20px 0;
+}
+
+.smart-parse-content {
+    padding-top: 15px;
+}
+
+#smsEmailInput {
+    width: 100%;
+    min-height: 120px;
+    padding: 15px;
+    border: 2px dashed #cbd5e1;
+    border-radius: 12px;
+    font-size: 14px;
+    line-height: 1.6;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    resize: vertical;
+    transition: all 0.3s;
+}
+
+#smsEmailInput:focus {
+    outline: none;
+    border-color: #667eea;
+    background: #fafafa;
+}
+
+.parse-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.parse-result {
+    margin-top: 20px;
+    padding: 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 12px;
+    color: white;
+}
+
+.parse-result h4 {
+    margin: 0 0 15px 0;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.parsed-transaction {
+    background: rgba(255, 255, 255, 0.15);
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 12px;
+    backdrop-filter: blur(10px);
+}
+
+.parsed-transaction:last-child {
+    margin-bottom: 0;
+}
+
+.parsed-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.parsed-field {
+    display: flex;
+    flex-direction: column;
+}
+
+.parsed-label {
+    font-size: 12px;
+    opacity: 0.8;
+    margin-bottom: 4px;
+}
+
+.parsed-value {
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.parse-confirm-btn {
+    background: white;
+    color: #667eea;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.parse-confirm-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+@media (max-width: 768px) {
+    .parse-actions {
+        flex-direction: column;
+    }
+
+    .parse-actions button {
+        width: 100%;
+    }
+
+    .parsed-info {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ==================== 语音财务顾问样式 ==================== */
+
+.voice-advisor-card {
+    background: white;
+    border-radius: 20px;
+    padding: 25px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.voice-advisor-card h3 {
+    color: #333;
+    margin-bottom: 10px;
+    font-size: 20px;
+}
+
+.voice-advisor-card p {
+    margin-bottom: 15px;
+}
+
+.voice-advisor-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.voice-btn {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    user-select: none;
+}
+
+.voice-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 10px 35px rgba(102, 126, 234, 0.5);
+}
+
+.voice-btn:active,
+.voice-btn.recording {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    transform: scale(0.95);
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7);
+    }
+    50% {
+        box-shadow: 0 0 0 20px rgba(255, 255, 255, 0);
+    }
+}
+
+.voice-icon {
+    font-size: 48px;
+    margin-bottom: 8px;
+}
+
+.voice-text {
+    font-size: 16px;
+    font-weight: 600;
+    color: white;
+}
+
+.voice-status {
+    font-size: 14px;
+    color: #666;
+    padding: 10px 20px;
+    background: rgba(102, 126, 234, 0.1);
+    border-radius: 20px;
+    text-align: center;
+}
+
+.voice-transcript,
+.voice-response {
+    width: 100%;
+    padding: 15px 20px;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+    border-radius: 12px;
+    border-left: 4px solid #667eea;
+}
+
+.voice-transcript strong,
+.voice-response strong {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 14px;
+    color: #667eea;
+    font-weight: 600;
+}
+
+.voice-transcript #transcriptText,
+.voice-response #responseText {
+    color: #333;
+}
+
+#transcriptText,
+#responseText {
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+#responseText {
+    white-space: pre-wrap;
+}
+
+@media (max-width: 768px) {
+    .voice-btn {
+        width: 120px;
+        height: 120px;
+    }
+
+    .voice-icon {
+        font-size: 36px;
+    }
+
+    .voice-text {
+        font-size: 14px;
+    }
+}
+
+/* ==================== 增强版健康评分UI ==================== */
+
+.score-dimensions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 15px 0;
+}
+
+.factor-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+}
+
+.factor-label {
+    min-width: 100px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #333;
+}
+
+.factor-bar {
+    flex: 1;
+    height: 10px;
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.factor-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #10b981, #3b82f6);
+    transition: width 0.5s ease;
+    border-radius: 5px;
+}
+
+.factor-score {
+    min-width: 50px;
+    text-align: right;
+    font-size: 12px;
+    font-weight: 600;
+    color: #666;
+}
+
+.score-suggestions {
+    margin-top: 20px;
+    padding: 15px;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+    border-radius: 10px;
+    border-left: 4px solid #3b82f6;
+}
+
+.score-suggestions h4 {
+    margin: 0 0 10px 0;
+    font-size: 14px;
+    color: #3b82f6;
+}
+
+.score-suggestions ul {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.score-suggestions li {
+    font-size: 13px;
+    color: #555;
+    margin: 6px 0;
+    line-height: 1.5;
+}
+
+.score-trend {
+    margin-top: 20px;
+    padding: 15px;
+    background: rgba(0, 0, 0, 0.02);
+    border-radius: 10px;
+}
+
+.score-trend h4 {
+    margin: 0 0 10px 0;
+    font-size: 14px;
+    color: #333;
+}
+
+#scoreTrendChart {
+    margin-top: 10px;
+}
+
+/* ==================== 增强版挑战系统UI ==================== */
+
+.challenge-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding: 12px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 10px;
+    color: white;
+}
+
+.user-points {
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.challenge-summary {
+    display: flex;
+    gap: 8px;
+}
+
+.difficulty-badge {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.difficulty-badge.easy {
+    background: rgba(16, 185, 129, 0.2);
+}
+
+.difficulty-badge.medium {
+    background: rgba(59, 130, 246, 0.2);
+}
+
+.difficulty-badge.hard {
+    background: rgba(139, 92, 246, 0.2);
+}
+
+.challenges-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.challenge-item {
+    background: white;
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border-left: 4px solid transparent;
+}
+
+.challenge-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.challenge-item.completed {
+    opacity: 0.7;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.05));
+}
+
+.challenge-header-row {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+.challenge-icon-large {
+    font-size: 32px;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.04);
+    border-radius: 10px;
+}
+
+.challenge-meta {
+    flex: 1;
+}
+
+.challenge-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.challenge-badges {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.difficulty-tag {
+    padding: 3px 8px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 600;
+    color: white;
+}
+
+.points-tag {
+    padding: 3px 8px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 600;
+    background: #fbbf24;
+    color: #78350f;
+}
+
+.challenge-desc {
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 12px;
+    line-height: 1.5;
+}
+
+.challenge-progress-container {
+    margin-top: 10px;
+}
+
+.challenge-progress-bar {
+    width: 100%;
+    height: 8px;
+    background: rgba(0, 0, 0, 0.08);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.challenge-progress-fill {
+    height: 100%;
+    transition: width 0.5s ease, background 0.3s ease;
+    border-radius: 4px;
+}
+
+.challenge-stats {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+}
+
+.progress-text {
+    color: #555;
+    font-weight: 500;
+}
+
+.progress-percent {
+    color: #888;
+    font-weight: 600;
+}
+
+.completed-badge {
+    margin-top: 10px;
+    padding: 8px;
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    text-align: center;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 13px;
+}
+
+.challenge-complete-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 10000;
+    animation: slideInRight 0.5s ease, slideOutRight 0.5s ease 2.5s;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOutRight {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+}
+
+.notification-content {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    min-width: 300px;
+}
+
+.notification-icon {
+    font-size: 48px;
+}
+
+.notification-text h4 {
+    margin: 0 0 5px 0;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.notification-text p {
+    margin: 3px 0;
+    font-size: 14px;
+}
+
+.points-earned {
+    font-weight: 700;
+    font-size: 16px;
+    color: #fbbf24;
+}
+
+.no-challenge {
+    text-align: center;
+    padding: 40px 20px;
+    color: #888;
+}
+
+.no-challenge p {
+    font-size: 16px;
+    margin-bottom: 15px;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .challenge-header {
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-start;
+    }
+
+    .challenge-summary {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .challenge-icon-large {
+        font-size: 28px;
+        width: 45px;
+        height: 45px;
+    }
+
+    .challenge-title {
+        font-size: 15px;
+    }
+
+    .notification-content {
+        min-width: 250px;
+        padding: 15px;
+    }
+
+    .notification-icon {
+        font-size: 36px;
+    }
+
+    .factor-label {
+        min-width: 80px;
+        font-size: 12px;
+    }
+}
+
