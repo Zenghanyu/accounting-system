@@ -1114,8 +1114,414 @@ function hideLoading() {
     document.getElementById('loadingOverlay').style.display = 'none';
 }
 
+// ==================== 票据扫描识别 ====================
+
+let currentReceiptImage = null;
+
+function handleReceiptUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // 检查文件类型
+    if (!file.type.startsWith('image/')) {
+        alert('请上传图片文件！');
+        return;
+    }
+
+    // 检查文件大小（限制为5MB）
+    if (file.size > 5 * 1024 * 1024) {
+        alert('图片大小不能超过5MB！');
+        return;
+    }
+
+    // 读取图片并显示预览
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        currentReceiptImage = e.target.result;
+        const preview = document.getElementById('receiptPreview');
+        const img = document.getElementById('receiptImage');
+
+        img.src = currentReceiptImage;
+        preview.style.display = 'block';
+
+        // 隐藏之前的结果
+        document.getElementById('receiptResult').style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+}
+
+async function analyzeReceipt() {
+    if (!currentReceiptImage) {
+        alert('请先上传票据图片！');
+        return;
+    }
+
+    if (!deepseekApiKey) {
+        alert('请先在AI分析页面设置DeepSeek API密钥！');
+        return;
+    }
+
+    showLoading('正在识别票据...');
+
+    try {
+        // 将base64图片转换为可用格式
+        const base64Image = currentReceiptImage.split(',')[1];
+
+        const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${deepseekApiKey}`
+            },
+            body: JSON.stringify({
+                model: 'deepseek-chat',
+                messages: [
+                    {
+                        role: 'system',
+                        content: '你是一个专业的票据识别助手。请分析图片中的票据信息，提取金额、日期、商户名称、购买物品等信息。请以JSON格式返回结果，格式如下：{"amount": 金额数字, "date": "YYYY-MM-DD", "merchant": "商户名称", "category": "分类", "items": "购买物品描述"}。分类请从以下选项中选择：餐饮、交通、购物、娱乐、医疗、教育、住房、其他。'
+                    },
+                    {
+                        role: 'user',
+                        content: [
+                            {
+                                type: 'text',
+                                text: '请识别这张票据的信息，并返回JSON格式的结果。'
+                            },
+                            {
+                                type: 'image_url',
+                                image_url: {
+                                    url: currentReceiptImage
+                                }
+                            }
+                        ]
+                    }
+                ],
+                temperature: 0.3,
+                max_tokens: 1000
+            })
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error?.message || '识别失败');
+        }
+
+        const data = await response.json();
+        const resultText = data.choices[0].message.content;
+
+        // 尝试解析JSON结果
+        let receiptData;
+        try {
+            // 提取JSON部分
+            const jsonMatch = resultText.match(/\{[\s\S]*\}/);
+            if (jsonMatch) {
+                receiptData = JSON.parse(jsonMatch[0]);
+            } else {
+                throw new Error('无法解析识别结果');
+            }
+        } catch (e) {
+            // 如果无法解析JSON，显示原始结果
+            displayReceiptResult(resultText, null);
+            return;
+        }
+
+        displayReceiptResult(resultText, receiptData);
+
+    } catch (error) {
+        console.error('票据识别错误:', error);
+        alert('票据识别失败：' + error.message);
+    } finally {
+        hideLoading();
+    }
+}
+
+function displayReceiptResult(rawText, data) {
+    const resultDiv = document.getElementById('receiptResult');
+
+    let html = '<h4>识别结果</h4>';
+
+    if (data) {
+        html += `
+            <div class="receipt-data">
+                <p><strong>金额：</strong>¥${data.amount || '未识别'}</p>
+                <p><strong>日期：</strong>${data.date || '未识别'}</p>
+                <p><strong>商户：</strong>${data.merchant || '未识别'}</p>
+                <p><strong>分类：</strong>${data.category || '未识别'}</p>
+                <p><strong>物品：</strong>${data.items || '未识别'}</p>
+            </div>
+            <button onclick="fillFormFromReceipt(${JSON.stringify(data).replace(/"/g, '&quot;')})" class="btn-primary">
+                ✅ 填充到记账表单
+            </button>
+        `;
+    } else {
+        html += `<div class="receipt-data"><p>${rawText}</p></div>`;
+    }
+
+    resultDiv.innerHTML = html;
+    resultDiv.style.display = 'block';
+}
+
+function fillFormFromReceipt(data) {
+    // 填充表单
+    document.getElementById('type').value = 'expense';
+    updateCategories();
+
+    if (data.category && categories.expense.includes(data.category)) {
+        document.getElementById('category').value = data.category;
+    }
+
+    if (data.amount) {
+        document.getElementById('amount').value = data.amount;
+    }
+
+    if (data.date) {
+        document.getElementById('date').value = data.date;
+    }
+
+    if (data.merchant || data.items) {
+        const note = [data.merchant, data.items].filter(x => x).join(' - ');
+        document.getElementById('note').value = note;
+    }
+
+    // 滚动到表单
+    document.getElementById('transactionForm').scrollIntoView({ behavior: 'smooth' });
+
+    alert('✅ 票据信息已填充到表单，请核对后提交！');
+}
+
+// ==================== 语音记账 ====================
+
+let isRecording = false;
+let recognition = null;
+
+function initSpeechRecognition() {
+    // 检查浏览器是否支持语音识别
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+        return null;
+    }
+
+    recognition = new SpeechRecognition();
+    recognition.lang = 'zh-CN';
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+    recognition.onstart = function() {
+        isRecording = true;
+        const btn = document.getElementById('voiceBtn');
+        const btnText = document.getElementById('voiceBtnText');
+        btn.classList.add('recording');
+        btnText.textContent = '🎤 正在录音...（说完后停顿）';
+    };
+
+    recognition.onend = function() {
+        isRecording = false;
+        const btn = document.getElementById('voiceBtn');
+        const btnText = document.getElementById('voiceBtnText');
+        btn.classList.remove('recording');
+        btnText.textContent = '点击开始语音记账';
+    };
+
+    recognition.onerror = function(event) {
+        console.error('语音识别错误:', event.error);
+        isRecording = false;
+        const btn = document.getElementById('voiceBtn');
+        const btnText = document.getElementById('voiceBtnText');
+        btn.classList.remove('recording');
+        btnText.textContent = '点击开始语音记账';
+
+        if (event.error === 'no-speech') {
+            alert('没有检测到语音，请重试');
+        } else if (event.error === 'not-allowed') {
+            alert('请允许使用麦克风权限');
+        } else {
+            alert('语音识别失败：' + event.error);
+        }
+    };
+
+    recognition.onresult = function(event) {
+        const transcript = event.results[0][0].transcript;
+        console.log('识别到的语音:', transcript);
+
+        // 显示识别结果
+        const resultDiv = document.getElementById('voiceResult');
+        resultDiv.innerHTML = `<p>识别到：<strong>${transcript}</strong></p>`;
+        resultDiv.style.display = 'block';
+
+        // 使用AI解析语音内容
+        parseVoiceToTransaction(transcript);
+    };
+
+    return recognition;
+}
+
+function startVoiceAccounting() {
+    if (!recognition) {
+        recognition = initSpeechRecognition();
+    }
+
+    if (!recognition) {
+        alert('您的浏览器不支持语音识别功能，请使用Chrome、Edge等现代浏览器');
+        return;
+    }
+
+    if (isRecording) {
+        recognition.stop();
+        return;
+    }
+
+    recognition.start();
+}
+
+async function parseVoiceToTransaction(text) {
+    if (!deepseekApiKey) {
+        alert('请先在AI分析页面设置DeepSeek API密钥！');
+        return;
+    }
+
+    showLoading('AI正在解析语音内容...');
+
+    try {
+        const prompt = `请解析以下语音记账内容，提取交易信息：
+
+"${text}"
+
+请以JSON格式返回，格式如下：
+{
+  "type": "income或expense",
+  "category": "分类",
+  "amount": 金额数字,
+  "note": "备注"
+}
+
+可选的支出分类：餐饮、交通、购物、娱乐、医疗、教育、住房、其他
+可选的收入分类：工资、奖金、投资、兼职、礼金、其他
+
+注意：
+1. 如果无法确定是收入还是支出，默认为支出
+2. 金额必须是数字
+3. 尽量准确匹配分类
+4. 备注可以包含详细信息`;
+
+        const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${deepseekApiKey}`
+            },
+            body: JSON.stringify({
+                model: 'deepseek-chat',
+                messages: [
+                    {
+                        role: 'system',
+                        content: '你是一个智能记账助手，擅长理解用户的记账需求并提取结构化信息。'
+                    },
+                    {
+                        role: 'user',
+                        content: prompt
+                    }
+                ],
+                temperature: 0.3,
+                max_tokens: 500
+            })
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error?.message || '解析失败');
+        }
+
+        const data = await response.json();
+        const resultText = data.choices[0].message.content;
+
+        // 解析JSON结果
+        let transactionData;
+        try {
+            const jsonMatch = resultText.match(/\{[\s\S]*\}/);
+            if (jsonMatch) {
+                transactionData = JSON.parse(jsonMatch[0]);
+            } else {
+                throw new Error('无法解析AI返回的结果');
+            }
+        } catch (e) {
+            console.error('JSON解析错误:', e);
+            alert('AI解析失败，请重试或手动输入');
+            return;
+        }
+
+        // 显示解析结果
+        displayVoiceResult(transactionData);
+
+        // 填充表单
+        fillFormFromVoice(transactionData);
+
+    } catch (error) {
+        console.error('语音解析错误:', error);
+        alert('AI解析失败：' + error.message);
+    } finally {
+        hideLoading();
+    }
+}
+
+function displayVoiceResult(data) {
+    const resultDiv = document.getElementById('voiceResult');
+
+    const typeText = data.type === 'income' ? '收入' : '支出';
+
+    let html = `
+        <div class="voice-parsed-result">
+            <h5>✅ AI解析结果</h5>
+            <p><strong>类型：</strong>${typeText}</p>
+            <p><strong>分类：</strong>${data.category || '未识别'}</p>
+            <p><strong>金额：</strong>¥${data.amount || '0'}</p>
+            ${data.note ? `<p><strong>备注：</strong>${data.note}</p>` : ''}
+            <p class="success-hint">信息已自动填充到表单，请核对后提交！</p>
+        </div>
+    `;
+
+    resultDiv.innerHTML = html;
+    resultDiv.style.display = 'block';
+}
+
+function fillFormFromVoice(data) {
+    // 设置类型
+    if (data.type) {
+        document.getElementById('type').value = data.type;
+        updateCategories();
+    }
+
+    // 设置分类
+    if (data.category) {
+        const categorySelect = document.getElementById('category');
+        // 检查分类是否存在于当前类型的分类列表中
+        const categoryOptions = Array.from(categorySelect.options).map(opt => opt.value);
+        if (categoryOptions.includes(data.category)) {
+            categorySelect.value = data.category;
+        }
+    }
+
+    // 设置金额
+    if (data.amount) {
+        document.getElementById('amount').value = data.amount;
+    }
+
+    // 设置备注
+    if (data.note) {
+        document.getElementById('note').value = data.note;
+    }
+
+    // 滚动到表单
+    setTimeout(() => {
+        document.getElementById('transactionForm').scrollIntoView({ behavior: 'smooth' });
+    }, 100);
+}
+
 // ==================== 页面加载 ====================
 
 window.addEventListener('DOMContentLoaded', function() {
     initAuth();
+
+    // 初始化语音识别
+    initSpeechRecognition();
 });

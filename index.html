@@ -115,6 +115,37 @@
 
             <!-- 记账页面 -->
             <div id="transactions" class="tab-content">
+                <!-- 智能记账功能 -->
+                <div class="card">
+                    <h3>🚀 智能记账</h3>
+                    <div class="smart-accounting">
+                        <!-- 语音记账 -->
+                        <div class="voice-accounting">
+                            <h4>🎤 语音记账</h4>
+                            <p class="hint">说出交易内容，AI自动识别并记录</p>
+                            <button type="button" onclick="startVoiceAccounting()" class="btn-voice" id="voiceBtn">
+                                <span id="voiceBtnText">点击开始语音记账</span>
+                            </button>
+                            <div id="voiceResult" class="voice-result" style="display:none;"></div>
+                        </div>
+
+                        <!-- 票据扫描 -->
+                        <div class="receipt-scanning">
+                            <h4>📸 票据扫描</h4>
+                            <p class="hint">上传发票照片，AI自动识别金额和分类</p>
+                            <input type="file" id="receiptUpload" accept="image/*" style="display:none;" onchange="handleReceiptUpload(event)">
+                            <button type="button" onclick="document.getElementById('receiptUpload').click()" class="btn-secondary">
+                                📤 上传票据图片
+                            </button>
+                            <div id="receiptPreview" class="receipt-preview" style="display:none;">
+                                <img id="receiptImage" src="" alt="票据预览">
+                                <button type="button" onclick="analyzeReceipt()" class="btn-primary">🔍 开始识别</button>
+                            </div>
+                            <div id="receiptResult" class="receipt-result" style="display:none;"></div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="card">
                     <h3>添加交易</h3>
                     <form id="transactionForm">
