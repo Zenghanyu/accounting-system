@@ -1,0 +1,40 @@
+# Claude Code 配置文件
+.claude/
+
+# GitHub workflows (需要特殊权限)
+.github/workflows/
+
+# 个人数据文件（不要上传到GitHub）
+*.xlsx
+*.xls
+*.csv
+*账单*.xlsx
+*交易明细*.csv
+
+# 大图片文件
+ebde7a6a3b7206110c97518c17934d3e.jpg
+
+# Windows批处理文件（可选）
+*.bat
+
+# 本地说明文件（已整合到Markdown中）
+*.txt
+!requirements.txt
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# 编辑器文件
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 日志文件
+*.log
+
+# 临时文件
+tmp/
+temp/

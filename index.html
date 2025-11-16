@@ -189,14 +189,57 @@
                 <!-- AI智能助手面板 -->
                 <div class="ai-assistant-panel" id="aiAssistantPanel">
                     <div class="ai-assistant-header">
-                        <h3>🤖 小记智能助手</h3>
+                        <h3>🤖 小记智能助手 - 全能版</h3>
                         <button class="btn-refresh" onclick="refreshAIInsights()" title="刷新小记分析">
                             🔄
                         </button>
                     </div>
-                    <div class="ai-insights-container" id="aiInsightsContainer">
-                        <div class="ai-insight-loading">
-                            <div class="loading-dots">AI正在分析您的财务数据<span>.</span><span>.</span><span>.</span></div>
+
+                    <!-- AI快捷命令 -->
+                    <div class="ai-quick-commands">
+                        <div class="quick-command-hint">💡 试试对小记说：</div>
+                        <div class="quick-commands-grid">
+                            <button class="quick-cmd-btn" onclick="sendQuickCommand('添加一笔50元的餐饮支出')">记一笔账</button>
+                            <button class="quick-cmd-btn" onclick="sendQuickCommand('查看本月预算')">查看预算</button>
+                            <button class="quick-cmd-btn" onclick="sendQuickCommand('本月花了多少钱')">本月支出</button>
+                            <button class="quick-cmd-btn" onclick="sendQuickCommand('设置餐饮预算1000元')">设置预算</button>
+                            <button class="quick-cmd-btn" onclick="sendQuickCommand('我的储蓄目标进度如何')">储蓄进度</button>
+                            <button class="quick-cmd-btn" onclick="sendQuickCommand('创建买房储蓄计划')">储蓄计划</button>
+                        </div>
+                    </div>
+
+                    <!-- AI对话框 -->
+                    <div class="ai-chat-container">
+                        <div class="ai-chat-messages" id="aiChatMessages">
+                            <div class="ai-message">
+                                <div class="ai-avatar">🤖</div>
+                                <div class="ai-bubble">
+                                    <p>你好！我是小记AI助手，我可以帮你：</p>
+                                    <ul>
+                                        <li>📝 添加/查询/删除交易记录</li>
+                                        <li>💰 管理预算和储蓄目标</li>
+                                        <li>📊 查看财务统计和分析</li>
+                                        <li>💳 管理账户和贷款</li>
+                                        <li>🎯 创建和跟踪财务计划</li>
+                                        <li>💸 管理借贷记录</li>
+                                    </ul>
+                                    <p>直接用自然语言告诉我你想做什么即可！</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="ai-chat-input-container">
+                            <input type="text" id="aiChatInput" class="ai-chat-input" placeholder="对小记说点什么...比如：添加一笔100元的餐饮支出" onkeypress="if(event.key==='Enter') sendAICommand()">
+                            <button onclick="sendAICommand()" class="btn-ai-send">发送</button>
+                        </div>
+                    </div>
+
+                    <!-- 原有的AI洞察 -->
+                    <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+                        <h4 style="margin-bottom: 10px;">📊 智能财务洞察</h4>
+                        <div class="ai-insights-container" id="aiInsightsContainer">
+                            <div class="ai-insight-loading">
+                                <div class="loading-dots">AI正在分析您的财务数据<span>.</span><span>.</span><span>.</span></div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -205,18 +248,22 @@
                     <div class="stat-card income">
                         <h3>本月收入</h3>
                         <p class="amount" id="totalIncome">¥0</p>
+                        <p class="comparison" id="incomeComparison"></p>
                     </div>
                     <div class="stat-card expense">
                         <h3>本月支出</h3>
                         <p class="amount" id="totalExpense">¥0</p>
+                        <p class="comparison" id="expenseComparison"></p>
                     </div>
                     <div class="stat-card balance">
                         <h3>本月结余</h3>
                         <p class="amount" id="balance">¥0</p>
+                        <p class="comparison" id="balanceComparison"></p>
                     </div>
                     <div class="stat-card total">
                         <h3>总资产</h3>
                         <p class="amount" id="totalAssets">¥0</p>
+                        <p class="comparison" id="assetsComparison"></p>
                     </div>
                 </div>
 
@@ -226,7 +273,14 @@
                         <canvas id="trendChart"></canvas>
                     </div>
                     <div class="chart-card">
-                        <h3>支出分类</h3>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <h3 style="margin: 0;">支出分类</h3>
+                            <div style="display: flex; gap: 10px; align-items: center;">
+                                <button onclick="changeCategoryMonth(-1)" class="btn-calendar-nav" style="padding: 5px 10px;">←</button>
+                                <span id="categoryMonthLabel" style="font-weight: 500; min-width: 80px; text-align: center;"></span>
+                                <button onclick="changeCategoryMonth(1)" class="btn-calendar-nav" style="padding: 5px 10px;">→</button>
+                            </div>
+                        </div>
                         <canvas id="categoryChart"></canvas>
                     </div>
                 </div>

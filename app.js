@@ -495,9 +495,12 @@ function updateStats() {
     const now = new Date();
     const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 
-    const monthTransactions = transactions.filter(t => t.date.startsWith(currentMonth));
+    // 计算上个月的年月
+    const lastMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const lastMonth = `${lastMonthDate.getFullYear()}-${String(lastMonthDate.getMonth() + 1).padStart(2, '0')}`;
 
-    // 多币种支持：将所有金额转换为CNY后求和
+    // 本月数据
+    const monthTransactions = transactions.filter(t => t.date.startsWith(currentMonth));
     const income = monthTransactions
         .filter(t => t.type === 'income')
         .reduce((sum, t) => {
@@ -513,13 +516,78 @@ function updateStats() {
         }, 0);
 
     const balance = income - expense;
-
     const totalAssets = accounts.reduce((sum, acc) => sum + acc.balance, 0);
 
+    // 上月数据
+    const lastMonthTransactions = transactions.filter(t => t.date.startsWith(lastMonth));
+    const lastIncome = lastMonthTransactions
+        .filter(t => t.type === 'income')
+        .reduce((sum, t) => {
+            const amountInCNY = convertToCNY(t.amount, t.currency || 'CNY');
+            return sum + amountInCNY;
+        }, 0);
+
+    const lastExpense = lastMonthTransactions
+        .filter(t => t.type === 'expense')
+        .reduce((sum, t) => {
+            const amountInCNY = convertToCNY(t.amount, t.currency || 'CNY');
+            return sum + amountInCNY;
+        }, 0);
+
+    const lastBalance = lastIncome - lastExpense;
+
+    // 更新显示
     document.getElementById('totalIncome').textContent = `¥${income.toFixed(2)}`;
     document.getElementById('totalExpense').textContent = `¥${expense.toFixed(2)}`;
     document.getElementById('balance').textContent = `¥${balance.toFixed(2)}`;
     document.getElementById('totalAssets').textContent = `¥${totalAssets.toFixed(2)}`;
+
+    // 更新对比信息
+    updateComparison('incomeComparison', income, lastIncome, '上月');
+    updateComparison('expenseComparison', expense, lastExpense, '上月', true); // expense是越少越好
+    updateComparison('balanceComparison', balance, lastBalance, '上月');
+
+    // 总资产对比（与上月同一天的资产对比，这里简化为显示上月结余）
+    const assetsChange = balance - lastBalance;
+    const assetsComparisonEl = document.getElementById('assetsComparison');
+    if (assetsComparisonEl) {
+        assetsComparisonEl.textContent = `上月结余: ¥${lastBalance.toFixed(2)}`;
+        assetsComparisonEl.style.color = '#666';
+        assetsComparisonEl.style.fontSize = '13px';
+    }
+}
+
+// 辅助函数：更新对比信息
+function updateComparison(elementId, current, previous, label, isReverse = false) {
+    const element = document.getElementById(elementId);
+    if (!element) return;
+
+    if (previous === 0) {
+        element.textContent = `${label}: ¥${previous.toFixed(2)}`;
+        element.style.color = '#666';
+    } else {
+        const change = current - previous;
+        const changePercent = (change / previous * 100).toFixed(1);
+        const arrow = change > 0 ? '↑' : change < 0 ? '↓' : '—';
+
+        // 判断颜色：对于支出，减少是好的（绿色），增加是不好的（红色）
+        let color = '#666';
+        if (change !== 0) {
+            if (isReverse) {
+                // 支出：减少是好的
+                color = change < 0 ? '#10b981' : '#ef4444';
+            } else {
+                // 收入/结余：增加是好的
+                color = change > 0 ? '#10b981' : '#ef4444';
+            }
+        }
+
+        element.textContent = `${label}: ¥${previous.toFixed(2)} ${arrow} ${Math.abs(parseFloat(changePercent))}%`;
+        element.style.color = color;
+    }
+
+    element.style.fontSize = '13px';
+    element.style.marginTop = '8px';
 }
 
 function updateCharts() {
@@ -601,11 +669,17 @@ function updateCategoryChart() {
     const ctx = document.getElementById('categoryChart');
     if (!ctx) return;
 
-    const now = new Date();
-    const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    // 使用选择的月份而不是当前月份
+    const selectedMonth = `${categoryChartYear}-${String(categoryChartMonth + 1).padStart(2, '0')}`;
+
+    // 更新月份标签
+    const monthLabel = document.getElementById('categoryMonthLabel');
+    if (monthLabel) {
+        monthLabel.textContent = `${categoryChartYear}年${categoryChartMonth + 1}月`;
+    }
 
     const expenseTransactions = transactions.filter(t =>
-        t.type === 'expense' && t.date.startsWith(currentMonth)
+        t.type === 'expense' && t.date.startsWith(selectedMonth)
     );
 
     const categoryData = {};
@@ -1323,27 +1397,27 @@ function initSpeechRecognition() {
 
     recognition.onstart = function() {
         isRecording = true;
-        const btn = document.getElementById('voiceBtn');
+        const btn = document.getElementById('voiceAccountingBtn');
         const btnText = document.getElementById('voiceBtnText');
-        btn.classList.add('recording');
-        btnText.textContent = '🎤 正在录音...（说完后停顿）';
+        if (btn) btn.classList.add('recording');
+        if (btnText) btnText.textContent = '🎤 正在录音...（说完后停顿）';
     };
 
     recognition.onend = function() {
         isRecording = false;
-        const btn = document.getElementById('voiceBtn');
+        const btn = document.getElementById('voiceAccountingBtn');
         const btnText = document.getElementById('voiceBtnText');
-        btn.classList.remove('recording');
-        btnText.textContent = '点击开始语音记账';
+        if (btn) btn.classList.remove('recording');
+        if (btnText) btnText.textContent = '点击开始语音记账';
     };
 
     recognition.onerror = function(event) {
         console.error('语音识别错误:', event.error);
         isRecording = false;
-        const btn = document.getElementById('voiceBtn');
+        const btn = document.getElementById('voiceAccountingBtn');
         const btnText = document.getElementById('voiceBtnText');
-        btn.classList.remove('recording');
-        btnText.textContent = '点击开始语音记账';
+        if (btn) btn.classList.remove('recording');
+        if (btnText) btnText.textContent = '点击开始语音记账';
 
         if (event.error === 'no-speech') {
             alert('没有检测到语音，请重试');
@@ -3505,6 +3579,10 @@ let currentCalendarYear = new Date().getFullYear();
 let currentCalendarMonth = new Date().getMonth(); // 0-11
 let selectedDate = null;
 
+// 支出分类图表的月份选择
+let categoryChartYear = new Date().getFullYear();
+let categoryChartMonth = new Date().getMonth(); // 0-11
+
 function renderCalendar() {
     const year = currentCalendarYear;
     const month = currentCalendarMonth;
@@ -3698,6 +3776,22 @@ function closeDayDetails() {
     document.getElementById('dayDetails').style.display = 'none';
     selectedDate = null;
     renderCalendar();
+}
+
+// ==================== 支出分类月份切换 ====================
+
+function changeCategoryMonth(delta) {
+    categoryChartMonth += delta;
+
+    if (categoryChartMonth > 11) {
+        categoryChartMonth = 0;
+        categoryChartYear++;
+    } else if (categoryChartMonth < 0) {
+        categoryChartMonth = 11;
+        categoryChartYear--;
+    }
+
+    updateCategoryChart();
 }
 
 // ==================== 商家分析功能 ====================
@@ -4878,3 +4972,706 @@ window.addEventListener('DOMContentLoaded', function() {
 
     // 注意：initVoiceRecognition() 现在在登录后的 initApp() 中调用
 });
+
+// ==================== AI智能命令系统 ====================
+
+// AI对话历史
+let aiCommandHistory = [];
+
+/**
+ * 快捷命令
+ */
+function sendQuickCommand(command) {
+    document.getElementById('aiChatInput').value = command;
+    sendAICommand();
+}
+
+/**
+ * 发送AI命令
+ */
+async function sendAICommand() {
+    const input = document.getElementById('aiChatInput');
+    const userMessage = input.value.trim();
+
+    if (!userMessage) return;
+
+    // 添加用户消息到界面
+    addChatMessage(userMessage, 'user');
+    input.value = '';
+
+    // 显示正在思考
+    showAITyping();
+
+    try {
+        // 使用AI理解用户意图并执行操作
+        await processAICommand(userMessage);
+    } catch (error) {
+        console.error('AI命令处理失败:', error);
+        removeAITyping();
+        addChatMessage('抱歉，我遇到了一些问题。请稍后再试。', 'ai', true);
+    }
+}
+
+/**
+ * 处理AI命令
+ */
+async function processAICommand(userMessage) {
+    // 使用DeepSeek AI理解用户意图
+    const intent = await analyzeUserIntent(userMessage);
+
+    removeAITyping();
+
+    // 根据意图执行相应操作
+    const result = await executeCommand(intent);
+
+    // 显示结果
+    if (result.success) {
+        addChatMessage(result.message, 'ai', false, result.data);
+    } else {
+        addChatMessage(result.message, 'ai', true);
+    }
+}
+
+/**
+ * 分析用户意图
+ */
+async function analyzeUserIntent(userMessage) {
+    const apiKey = deepseekApiKey || DEFAULT_API_KEY;
+
+    // 构建当前财务数据上下文
+    const now = new Date();
+    const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    const monthTransactions = transactions.filter(t => t.date.startsWith(currentMonth));
+
+    const context = {
+        totalTransactions: transactions.length,
+        monthIncome: monthTransactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0),
+        monthExpense: monthTransactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0),
+        budgetCount: budgets.length,
+        savingsGoalCount: savingsGoals.length,
+        accountCount: accounts.length,
+        loanCount: loans.length
+    };
+
+    const systemPrompt = `你是小记AI助手的意图识别系统。分析用户的自然语言命令，识别用户想要执行的操作。
+
+支持的操作类型：
+1. ADD_TRANSACTION - 添加交易记录（收入或支出）
+2. QUERY_STATS - 查询统计数据
+3. MANAGE_BUDGET - 管理预算
+4. MANAGE_SAVINGS - 管理储蓄目标
+5. MANAGE_ACCOUNT - 管理账户
+6. MANAGE_LOAN - 管理贷款
+7. MANAGE_LEND_BORROW - 管理借贷
+8. CREATE_SAVINGS_PLAN - 创建储蓄计划
+9. GENERAL_QUERY - 一般性咨询
+
+返回JSON格式：
+{
+  "intent": "操作类型",
+  "parameters": {
+    // 根据操作类型提取的参数
+    // ADD_TRANSACTION: { type, category, amount, date, note }
+    // QUERY_STATS: { type, period }
+    // MANAGE_BUDGET: { action, category, amount }
+    // MANAGE_SAVINGS: { action, name, target, current, deadline }
+    // 等等
+  },
+  "confidence": 0.95
+}
+
+只返回JSON，不要其他解释。`;
+
+    const prompt = `用户命令：${userMessage}
+
+当前财务状况：
+- 总交易记录：${context.totalTransactions}笔
+- 本月收入：¥${context.monthIncome.toFixed(2)}
+- 本月支出：¥${context.monthExpense.toFixed(2)}
+- 预算数量：${context.budgetCount}个
+- 储蓄目标：${context.savingsGoalCount}个
+- 账户数量：${context.accountCount}个
+- 贷款数量：${context.loanCount}个
+
+请分析用户意图。`;
+
+    const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+            model: 'deepseek-chat',
+            messages: [
+                { role: 'system', content: systemPrompt },
+                { role: 'user', content: prompt }
+            ],
+            temperature: 0.3,
+            max_tokens: 500
+        })
+    });
+
+    if (!response.ok) {
+        throw new Error('意图识别失败');
+    }
+
+    const data = await response.json();
+    const resultText = data.choices[0].message.content;
+
+    // 解析JSON
+    const jsonMatch = resultText.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+        return JSON.parse(jsonMatch[0]);
+    }
+
+    throw new Error('无法解析意图');
+}
+
+/**
+ * 执行命令
+ */
+async function executeCommand(intent) {
+    try {
+        switch (intent.intent) {
+            case 'ADD_TRANSACTION':
+                return await addTransactionCommand(intent.parameters);
+
+            case 'QUERY_STATS':
+                return queryStatsCommand(intent.parameters);
+
+            case 'MANAGE_BUDGET':
+                return manageBudgetCommand(intent.parameters);
+
+            case 'MANAGE_SAVINGS':
+                return manageSavingsCommand(intent.parameters);
+
+            case 'MANAGE_ACCOUNT':
+                return manageAccountCommand(intent.parameters);
+
+            case 'MANAGE_LOAN':
+                return manageLoanCommand(intent.parameters);
+
+            case 'MANAGE_LEND_BORROW':
+                return manageLendBorrowCommand(intent.parameters);
+
+            case 'CREATE_SAVINGS_PLAN':
+                return createSavingsPlanCommand(intent.parameters);
+
+            case 'GENERAL_QUERY':
+                return await generalQueryCommand(intent.parameters);
+
+            default:
+                return {
+                    success: false,
+                    message: '抱歉，我还不理解这个命令。请换一种说法试试。'
+                };
+        }
+    } catch (error) {
+        console.error('命令执行失败:', error);
+        return {
+            success: false,
+            message: `执行失败：${error.message}`
+        };
+    }
+}
+
+/**
+ * 添加交易命令
+ */
+async function addTransactionCommand(params) {
+    // 验证必要参数
+    if (!params.type || !params.category || !params.amount) {
+        return {
+            success: false,
+            message: '信息不完整。请提供交易类型、分类和金额。例如：添加一笔100元的餐饮支出'
+        };
+    }
+
+    // 创建交易
+    const transaction = {
+        id: Date.now(),
+        type: params.type === '收入' || params.type === 'income' ? 'income' : 'expense',
+        category: params.category,
+        amount: parseFloat(params.amount),
+        currency: 'CNY',
+        date: params.date || new Date().toISOString().split('T')[0],
+        note: params.note || ''
+    };
+
+    transactions.push(transaction);
+    saveUserData();
+    displayTransactions();
+    updateDashboard();
+    analyzeMerchants();
+    renderCalendar();
+
+    const typeText = transaction.type === 'income' ? '收入' : '支出';
+    return {
+        success: true,
+        message: `✅ 已添加${typeText}记录：\n\n**${transaction.category}** - ¥${transaction.amount}\n日期：${transaction.date}${transaction.note ? '\n备注：' + transaction.note : ''}`,
+        data: transaction
+    };
+}
+
+/**
+ * 查询统计命令
+ */
+function queryStatsCommand(params) {
+    const now = new Date();
+    const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
+    // 本月数据
+    const monthTransactions = transactions.filter(t => t.date.startsWith(currentMonth));
+    const income = monthTransactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
+    const expense = monthTransactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+    const balance = income - expense;
+
+    // 分类统计
+    const categoryStats = {};
+    monthTransactions.filter(t => t.type === 'expense').forEach(t => {
+        categoryStats[t.category] = (categoryStats[t.category] || 0) + t.amount;
+    });
+
+    const topCategories = Object.entries(categoryStats)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5);
+
+    let message = `📊 **本月财务统计**\n\n`;
+    message += `💰 收入：¥${income.toFixed(2)}\n`;
+    message += `💸 支出：¥${expense.toFixed(2)}\n`;
+    message += `💎 结余：¥${balance.toFixed(2)}\n\n`;
+
+    if (topCategories.length > 0) {
+        message += `**主要支出分类：**\n`;
+        topCategories.forEach(([cat, amount], index) => {
+            const percent = (amount / expense * 100).toFixed(1);
+            message += `${index + 1}. ${cat}：¥${amount.toFixed(2)} (${percent}%)\n`;
+        });
+    }
+
+    return {
+        success: true,
+        message: message
+    };
+}
+
+/**
+ * 管理预算命令
+ */
+function manageBudgetCommand(params) {
+    if (params.action === '查看' || params.action === 'view') {
+        if (budgets.length === 0) {
+            return {
+                success: true,
+                message: '您还没有设置预算。可以说"设置餐饮预算1000元"来创建预算。'
+            };
+        }
+
+        const now = new Date();
+        const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
+        let message = '💰 **您的预算执行情况**\n\n';
+        budgets.forEach(budget => {
+            const spent = transactions
+                .filter(t => t.type === 'expense' && t.category === budget.category && t.date.startsWith(currentMonth))
+                .reduce((sum, t) => sum + t.amount, 0);
+
+            const percent = (spent / budget.amount * 100).toFixed(1);
+            const status = spent > budget.amount ? '⚠️ 超支' : '✅ 正常';
+
+            message += `**${budget.category}**\n`;
+            message += `预算：¥${budget.amount} | 已用：¥${spent.toFixed(2)} (${percent}%) ${status}\n\n`;
+        });
+
+        return { success: true, message };
+    }
+
+    if (params.action === '设置' || params.action === 'set') {
+        if (!params.category || !params.amount) {
+            return {
+                success: false,
+                message: '请提供分类和金额。例如：设置餐饮预算1000元'
+            };
+        }
+
+        const existingIndex = budgets.findIndex(b => b.category === params.category);
+        if (existingIndex >= 0) {
+            budgets[existingIndex].amount = parseFloat(params.amount);
+        } else {
+            budgets.push({
+                category: params.category,
+                amount: parseFloat(params.amount)
+            });
+        }
+
+        saveUserData();
+        displayBudgets();
+
+        return {
+            success: true,
+            message: `✅ 已设置**${params.category}**预算为 ¥${params.amount}`
+        };
+    }
+
+    return {
+        success: false,
+        message: '不支持的预算操作'
+    };
+}
+
+/**
+ * 管理储蓄目标命令
+ */
+function manageSavingsCommand(params) {
+    if (params.action === '查看' || params.action === 'view') {
+        if (savingsGoals.length === 0) {
+            return {
+                success: true,
+                message: '您还没有储蓄目标。可以说"创建一个1万元的旅游基金目标"来设置。'
+            };
+        }
+
+        let message = '🎯 **您的储蓄目标**\n\n';
+        savingsGoals.forEach(goal => {
+            const progress = (goal.current / goal.target * 100).toFixed(1);
+            const remaining = goal.target - goal.current;
+
+            message += `**${goal.name}**\n`;
+            message += `目标：¥${goal.target} | 当前：¥${goal.current} (${progress}%)\n`;
+            message += `还需：¥${remaining.toFixed(2)}\n`;
+            if (goal.deadline) {
+                message += `期限：${goal.deadline}\n`;
+            }
+            message += '\n';
+        });
+
+        return { success: true, message };
+    }
+
+    if (params.action === '创建' || params.action === 'create') {
+        if (!params.name || !params.target) {
+            return {
+                success: false,
+                message: '请提供目标名称和金额。例如：创建一个1万元的旅游基金目标'
+            };
+        }
+
+        const goal = {
+            id: Date.now(),
+            name: params.name,
+            target: parseFloat(params.target),
+            current: parseFloat(params.current || 0),
+            deadline: params.deadline || ''
+        };
+
+        savingsGoals.push(goal);
+        saveUserData();
+        displaySavings();
+
+        return {
+            success: true,
+            message: `✅ 已创建储蓄目标：**${goal.name}**\n目标金额：¥${goal.target}${goal.deadline ? '\n期限：' + goal.deadline : ''}`
+        };
+    }
+
+    return {
+        success: false,
+        message: '不支持的储蓄目标操作'
+    };
+}
+
+/**
+ * 管理账户命令
+ */
+function manageAccountCommand(params) {
+    if (params.action === '查看' || params.action === 'view') {
+        if (accounts.length === 0) {
+            return {
+                success: true,
+                message: '您还没有添加账户。可以说"添加一个工商银行储蓄卡，余额5000元"'
+            };
+        }
+
+        let message = '💳 **您的账户**\n\n';
+        let total = 0;
+        accounts.forEach(account => {
+            message += `**${account.name}** (${account.type})\n`;
+            message += `余额：¥${account.balance.toFixed(2)}\n\n`;
+            total += account.balance;
+        });
+        message += `**总计：¥${total.toFixed(2)}**`;
+
+        return { success: true, message };
+    }
+
+    // 添加账户
+    if (params.action === '添加' || params.action === 'add') {
+        if (!params.name || !params.balance) {
+            return {
+                success: false,
+                message: '请提供账户名称和余额'
+            };
+        }
+
+        const account = {
+            id: Date.now(),
+            name: params.name,
+            type: params.type || '其他',
+            balance: parseFloat(params.balance)
+        };
+
+        accounts.push(account);
+        saveUserData();
+        displayAccounts();
+        updateDashboard();
+
+        return {
+            success: true,
+            message: `✅ 已添加账户：**${account.name}**\n类型：${account.type}\n余额：¥${account.balance.toFixed(2)}`
+        };
+    }
+
+    return {
+        success: false,
+        message: '不支持的账户操作'
+    };
+}
+
+/**
+ * 管理贷款命令
+ */
+function manageLoanCommand(params) {
+    if (params.action === '查看' || params.action === 'view') {
+        if (loans.length === 0) {
+            return {
+                success: true,
+                message: '您没有贷款记录'
+            };
+        }
+
+        let message = '🏦 **您的贷款**\n\n';
+        loans.forEach(loan => {
+            message += `**${loan.name}**\n`;
+            message += `金额：¥${loan.amount.toFixed(2)}\n`;
+            message += `利率：${loan.rate}%\n`;
+            message += `月供：¥${loan.monthlyPayment.toFixed(2)}\n`;
+            message += `期数：${loan.months}个月\n\n`;
+        });
+
+        return { success: true, message };
+    }
+
+    return {
+        success: false,
+        message: '不支持的贷款操作'
+    };
+}
+
+/**
+ * 管理借贷命令
+ */
+function manageLendBorrowCommand(params) {
+    const type = params.type || 'lent';
+    const records = type === 'lent' ? lentMoney : borrowedMoney;
+
+    if (records.length === 0) {
+        const typeText = type === 'lent' ? '借出' : '借入';
+        return {
+            success: true,
+            message: `您没有${typeText}记录`
+        };
+    }
+
+    const typeText = type === 'lent' ? '借出' : '借入';
+    const personKey = type === 'lent' ? 'to' : 'from';
+
+    let message = `💸 **您的${typeText}记录**\n\n`;
+    let total = 0;
+    records.forEach(record => {
+        if (!record.returned) {
+            message += `${record[personKey]}：¥${record.amount.toFixed(2)}\n`;
+            message += `日期：${record.date}\n`;
+            if (record.dueDate) {
+                message += `预计归还：${record.dueDate}\n`;
+            }
+            message += '\n';
+            total += record.amount;
+        }
+    });
+
+    if (total > 0) {
+        message += `**未归还总计：¥${total.toFixed(2)}**`;
+    } else {
+        message = `所有${typeText}都已归还！`;
+    }
+
+    return { success: true, message };
+}
+
+/**
+ * 创建储蓄计划命令
+ */
+function createSavingsPlanCommand(params) {
+    if (!params.name || !params.amount) {
+        return {
+            success: false,
+            message: '请提供计划名称和目标金额。例如：创建买房储蓄计划，目标50万元，3年内完成'
+        };
+    }
+
+    const plan = {
+        id: Date.now(),
+        name: params.name,
+        targetAmount: parseFloat(params.amount),
+        currentAmount: parseFloat(params.current || 0),
+        deadline: params.deadline || '',
+        icon: params.icon || '💰',
+        createdDate: new Date().toISOString().split('T')[0]
+    };
+
+    savingsPlans.push(plan);
+    saveUserData();
+    displaySavingsPlans();
+
+    return {
+        success: true,
+        message: `✅ 已创建储蓄计划：**${plan.name}**\n目标金额：¥${plan.targetAmount}${plan.deadline ? '\n期限：' + plan.deadline : ''}`
+    };
+}
+
+/**
+ * 一般性查询命令
+ */
+async function generalQueryCommand(params) {
+    // 使用DeepSeek AI回答一般性问题
+    const apiKey = deepseekApiKey || DEFAULT_API_KEY;
+
+    const context = generateFinancialSummary();
+    const prompt = `基于用户的财务数据回答问题：
+
+用户财务概况：
+- 本月收入：¥${context.currentMonth.income.toFixed(2)}
+- 本月支出：¥${context.currentMonth.expense.toFixed(2)}
+- 本月结余：¥${context.currentMonth.balance.toFixed(2)}
+- 总资产：¥${context.totalAssets.toFixed(2)}
+
+用户问题：${params.question || '如何改善财务状况？'}
+
+请用简洁、友好的语言回答，给出实用的建议。`;
+
+    const systemPrompt = '你是小记AI助手，一个专业的财务顾问。用简洁、实用的语言提供建议。';
+
+    try {
+        const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${apiKey}`
+            },
+            body: JSON.stringify({
+                model: 'deepseek-chat',
+                messages: [
+                    { role: 'system', content: systemPrompt },
+                    { role: 'user', content: prompt }
+                ],
+                temperature: 0.7,
+                max_tokens: 500
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error('AI响应失败');
+        }
+
+        const data = await response.json();
+        const answer = data.choices[0].message.content;
+
+        return {
+            success: true,
+            message: answer
+        };
+    } catch (error) {
+        return {
+            success: false,
+            message: '抱歉，AI服务暂时不可用'
+        };
+    }
+}
+
+/**
+ * 添加聊天消息到界面
+ */
+function addChatMessage(message, sender, isError = false, data = null) {
+    const messagesContainer = document.getElementById('aiChatMessages');
+
+    const messageDiv = document.createElement('div');
+    messageDiv.className = sender === 'user' ? 'ai-message user-message' : 'ai-message';
+
+    const avatar = document.createElement('div');
+    avatar.className = sender === 'user' ? 'ai-avatar user-avatar' : 'ai-avatar';
+    avatar.textContent = sender === 'user' ? '👤' : '🤖';
+
+    const bubble = document.createElement('div');
+    bubble.className = sender === 'user' ? 'ai-bubble user-bubble' : 'ai-bubble';
+
+    if (isError) {
+        bubble.classList.add('ai-action-error');
+    }
+
+    // 转换markdown格式
+    const formattedMessage = message
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\n/g, '<br>');
+
+    bubble.innerHTML = formattedMessage;
+
+    if (sender === 'user') {
+        messageDiv.appendChild(bubble);
+        messageDiv.appendChild(avatar);
+    } else {
+        messageDiv.appendChild(avatar);
+        messageDiv.appendChild(bubble);
+    }
+
+    messagesContainer.appendChild(messageDiv);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+    // 保存到历史
+    aiCommandHistory.push({ sender, message, timestamp: Date.now() });
+}
+
+/**
+ * 显示AI正在输入
+ */
+function showAITyping() {
+    const messagesContainer = document.getElementById('aiChatMessages');
+
+    const typingDiv = document.createElement('div');
+    typingDiv.className = 'ai-message';
+    typingDiv.id = 'aiTypingIndicator';
+
+    const avatar = document.createElement('div');
+    avatar.className = 'ai-avatar';
+    avatar.textContent = '🤖';
+
+    const typingBubble = document.createElement('div');
+    typingBubble.className = 'ai-typing';
+    typingBubble.innerHTML = '<span></span><span></span><span></span>';
+
+    typingDiv.appendChild(avatar);
+    typingDiv.appendChild(typingBubble);
+    messagesContainer.appendChild(typingDiv);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+
+/**
+ * 移除AI正在输入提示
+ */
+function removeAITyping() {
+    const typingIndicator = document.getElementById('aiTypingIndicator');
+    if (typingIndicator) {
+        typingIndicator.remove();
+    }
+}
+
