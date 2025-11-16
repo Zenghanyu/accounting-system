@@ -1,4 +1,4 @@
-const CACHE_NAME = 'hajimi-v2.0.2';  // 修复API Key问题
+const CACHE_NAME = 'hajimi-v2.1.0';  // AI功能开箱即用版本
 const urlsToCache = [
   '/accounting-system/',
   '/accounting-system/index.html',
