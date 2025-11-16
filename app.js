@@ -17,8 +17,9 @@ let challenges = []; // 挑战任务列表
 let achievements = []; // 成就列表
 let categoryLearningData = {}; // 分类学习数据 { "关键词": { category: "分类", count: 次数, type: "类型" } }
 
-// 默认API密钥 - 供用户免费使用AI功能
-const DEFAULT_API_KEY = 'sk-7d3699027b2749c8b50e587afdc11511';
+// 默认API密钥已移除 - 请用户配置自己的DeepSeek API Key
+// 访问 https://platform.deepseek.com 注册并获取免费API Key
+const DEFAULT_API_KEY = ''; // 不再提供默认Key，避免额度耗尽问题
 
 // AI功能防抖定时器
 let aiSuggestionTimeout = null;
@@ -5032,7 +5033,21 @@ async function sendAICommand() {
     } catch (error) {
         console.error('AI命令处理失败:', error);
         removeAITyping();
-        addChatMessage('抱歉，我遇到了一些问题。请稍后再试。', 'ai', true);
+
+        // 改进的错误提示
+        let errorMsg = '抱歉，我遇到了一些问题。';
+
+        if (error.message.includes('API密钥未配置') || !deepseekApiKey) {
+            errorMsg = '⚠️ **请先配置API密钥**\n\n请前往 **AI分析** 页面配置您的 DeepSeek API Key。\n\n🔗 获取免费密钥：https://platform.deepseek.com';
+        } else if (error.message.includes('401') || error.message.includes('无效')) {
+            errorMsg = '❌ **API密钥无效**\n\n您的API密钥可能已过期或无效。\n\n请前往 **AI分析** 页面重新配置。';
+        } else if (error.message.includes('429')) {
+            errorMsg = '⏰ **API调用次数超限**\n\n请稍后再试，或升级您的DeepSeek套餐。';
+        } else {
+            errorMsg = `❌ **出错了**\n\n${error.message}\n\n提示：如果您还没有配置API密钥，请前往 **AI分析** 页面配置。`;
+        }
+
+        addChatMessage(errorMsg, 'ai', true);
     }
 }
 

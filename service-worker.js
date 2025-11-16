@@ -1,4 +1,4 @@
-const CACHE_NAME = 'hajimi-v2.0.1';  // 更新版本号以清除旧缓存
+const CACHE_NAME = 'hajimi-v2.0.2';  // 修复API Key问题
 const urlsToCache = [
   '/accounting-system/',
   '/accounting-system/index.html',
