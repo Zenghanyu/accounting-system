@@ -1,4 +1,4 @@
-const CACHE_NAME = 'hajimi-v2.1.0';  // AI功能开箱即用版本
+const CACHE_NAME = 'hajimi-v2.1.1';  // 修复移动端语音识别提示
 const urlsToCache = [
   '/accounting-system/',
   '/accounting-system/index.html',
