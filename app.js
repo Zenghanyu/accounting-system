@@ -4882,7 +4882,14 @@ async function processVoiceQuestion(question) {
 请作为专业的AI财务顾问，用简洁、易懂的语言回答用户的问题。回答要自然、亲切，就像在和朋友聊天一样。回答控制在100字以内。`;
 
         const systemPrompt = '你是小记，一个友好、专业的AI财务顾问助手。你的回答要简洁、实用、易懂。';
+
+        console.log('语音财务顾问 - 开始调用API');
+        console.log('问题:', question);
+
         const response = await callDeepSeekAPI(prompt, systemPrompt);
+
+        console.log('语音财务顾问 - API调用成功');
+        console.log('回复:', response);
 
         // 显示回复
         currentResponseText = response;
@@ -4898,16 +4905,33 @@ async function processVoiceQuestion(question) {
         speakText(response);
 
     } catch (error) {
-        console.error('处理语音问题失败:', error);
-        updateVoiceStatus('处理失败，请重试');
+        console.error('处理语音问题失败 - 详细错误:', error);
+        console.error('错误类型:', error.constructor.name);
+        console.error('错误消息:', error.message);
+        console.error('错误堆栈:', error.stack);
+
+        updateVoiceStatus('处理失败');
 
         // 根据错误类型提供不同的错误消息
         let errorMsg = '抱歉，我现在无法回答您的问题。';
-        if (error.message.includes('API') || error.message.includes('请求失败')) {
-            errorMsg = '抱歉，AI服务暂时不可用，请稍后再试。';
+
+        if (error.message.includes('API密钥未配置')) {
+            errorMsg = '请先在AI分析页面配置您的DeepSeek API密钥。';
+        } else if (error.message.includes('401') || error.message.includes('无效') || error.message.includes('已过期')) {
+            errorMsg = 'API密钥无效或已过期，请检查您的密钥是否正确。';
+        } else if (error.message.includes('429') || error.message.includes('超限')) {
+            errorMsg = 'API调用次数超限，请稍后再试。';
+        } else if (error.message.includes('500') || error.message.includes('AI服务')) {
+            errorMsg = 'AI服务暂时不可用，请稍后再试。';
+        } else if (error.message.includes('API') || error.message.includes('请求失败')) {
+            errorMsg = `AI服务出错：${error.message}`;
         } else if (error.message.includes('网络')) {
             errorMsg = '网络连接失败，请检查您的网络后重试。';
+        } else {
+            errorMsg = `出错了：${error.message}`;
         }
+
+        console.log('将显示错误消息:', errorMsg);
 
         const responseTextEl = document.getElementById('responseText');
         const voiceResponseEl = document.getElementById('voiceResponse');
