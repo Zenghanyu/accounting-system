@@ -1404,12 +1404,10 @@ function initSpeechRecognition() {
         }
 
         if (btnText) {
-            if (isIOS) {
-                btnText.textContent = 'iOS暂不支持语音记账（请使用AI助手文字输入）';
-            } else if (isMobile) {
-                btnText.textContent = '请使用Android Chrome或电脑浏览器';
+            if (isMobile) {
+                btnText.textContent = '受手机端API限制，语音记账仅支持PC端（可使用AI助手文字输入）';
             } else {
-                btnText.textContent = '浏览器不支持语音识别';
+                btnText.textContent = '浏览器不支持语音识别（请使用Chrome或Edge）';
             }
         }
 
@@ -4744,10 +4742,8 @@ function initVoiceRecognition() {
 
         // 根据设备类型显示不同提示
         let statusMsg = '';
-        if (isIOS) {
-            statusMsg = '❌ iOS设备暂不支持语音识别\n\n💡 替代方案：\n1. 使用文字输入与小记对话（在概览页面的AI助手）\n2. 在电脑上使用Chrome浏览器访问';
-        } else if (isMobile) {
-            statusMsg = '❌ 当前浏览器不支持语音识别\n\n💡 请使用 Android Chrome 浏览器\n或在电脑上访问以使用语音功能';
+        if (isMobile) {
+            statusMsg = '⚠️ 受手机端API限制，语音功能目前只能在PC端使用\n\n💡 替代方案：\n1. 使用文字输入与小记对话（在概览页面的AI助手）\n2. 在电脑上使用Chrome或Edge浏览器访问';
         } else {
             statusMsg = '❌ 浏览器不支持语音识别\n\n💡 请使用 Chrome、Edge 或其他支持语音的浏览器';
         }
