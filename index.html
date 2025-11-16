@@ -845,6 +845,23 @@
                         </div>
                     </div>
 
+                    <!-- 账单导入说明 -->
+                    <div class="import-hint" style="background: #f0f9ff; border-left: 4px solid #3b82f6; padding: 15px; margin-bottom: 20px; border-radius: 8px;">
+                        <div style="display: flex; align-items: start; gap: 10px;">
+                            <span style="font-size: 24px;">💡</span>
+                            <div>
+                                <strong style="color: #1e40af; font-size: 15px;">支持批量导入账单</strong>
+                                <p style="color: #1e3a8a; margin: 8px 0 0 0; font-size: 14px; line-height: 1.6;">
+                                    支持导入 <strong>支付宝账单（CSV）</strong> 和 <strong>微信账单（Excel）</strong>，系统会自动识别并分类您的交易记录。
+                                </p>
+                                <div style="margin-top: 10px; font-size: 13px; color: #3730a3;">
+                                    <div>📱 <strong>支付宝：</strong>支付宝APP → 我的 → 账单 → 右上角设置 → 下载账单 → 选择月份导出CSV</div>
+                                    <div style="margin-top: 5px;">💬 <strong>微信：</strong>微信支付公众号 → 我的账单 → 常见问题 → 下载账单 → 用于个人对账 → 选择月份导出Excel</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- 账单导入 -->
                     <input type="file" id="billImport" accept=".csv,.xlsx,.xls" style="display:none;" onchange="handleBillImport(event)">
 
