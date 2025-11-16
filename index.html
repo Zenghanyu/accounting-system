@@ -1178,15 +1178,26 @@
                     .then(registration => {
                         console.log('✅ Service Worker 注册成功:', registration.scope);
 
+                        // 定期检查更新（每30秒）
+                        setInterval(() => {
+                            registration.update();
+                        }, 30000);
+
                         // 检查更新
                         registration.addEventListener('updatefound', () => {
                             const newWorker = registration.installing;
+                            console.log('🔄 发现新版本，正在安装...');
+
                             newWorker.addEventListener('statechange', () => {
                                 if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
                                     // 有新版本可用
-                                    if (confirm('有新版本可用，是否立即更新？')) {
+                                    console.log('✨ 新版本已安装，等待激活');
+
+                                    // 显示更新提示
+                                    const updateMsg = '🎉 发现新版本！点击"确定"立即更新，或稍后手动强制刷新页面（Ctrl+Shift+R）';
+                                    if (confirm(updateMsg)) {
                                         newWorker.postMessage({ action: 'skipWaiting' });
-                                        window.location.reload();
+                                        window.location.reload(true);  // 强制重新加载
                                     }
                                 }
                             });

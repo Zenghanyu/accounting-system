@@ -1,10 +1,12 @@
-const CACHE_NAME = 'hajimi-v1.0.0';
+const CACHE_NAME = 'hajimi-v2.0.1';  // 更新版本号以清除旧缓存
 const urlsToCache = [
   '/accounting-system/',
   '/accounting-system/index.html',
   '/accounting-system/app.js',
   '/accounting-system/style.css',
-  '/accounting-system/ebde7a6a3b7206110c97518c17934d3e.jpg',
+  '/accounting-system/manifest.json',
+  '/accounting-system/icon-192.png',
+  '/accounting-system/icon-512.png',
   'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js',
   'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js'
 ];
